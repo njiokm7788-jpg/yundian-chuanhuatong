@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>云点传话筒 · 管理后台</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0f1216;color:#e8eaed}
+a{color:#6cb6ff}
+.wrap{max-width:1080px;margin:0 auto;padding:16px}
+h1{font-size:19px;margin:0 0 4px}
+.sub{color:#8b949e;font-size:12.5px;margin-bottom:16px}
+.card{background:#161b22;border:1px solid #232a33;border-radius:12px;padding:14px;margin-bottom:14px}
+label{display:block;font-size:12.5px;color:#8b949e;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px 12px;border-radius:9px;border:1px solid #2b333d;background:#0d1117;color:#e8eaed;font-size:14px;outline:none}
+input:focus,select:focus{border-color:#3b82f6}
+button{padding:10px 14px;border-radius:9px;border:0;background:#2f81f7;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+button.ghost{background:#21262d;color:#c9d1d9;font-weight:500}
+button.danger{background:#8b2c2c}
+button:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{background:#21262d;color:#8b949e;font-weight:500}
+.tabs button.on{background:#2f81f7;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 6px;border-bottom:1px solid #21262d;text-align:left;white-space:nowrap}
+th{color:#8b949e;font-weight:500;font-size:12px}
+.scroll{overflow:auto;-webkit-overflow-scrolling:touch}
+.tag{padding:1px 7px;border-radius:20px;font-size:11.5px;border:1px solid #2b333d;color:#8b949e}
+.tag.basic{color:#7ee787;border-color:#1f6f3d}
+.tag.pro{color:#f0c674;border-color:#7a5c1e}
+.tag.trial{color:#8b949e}
+.tag.off{color:#ff7b72;border-color:#6b2b28}
+.hint{font-size:12px;color:#8b949e;margin-top:8px}
+code{background:#0d1117;border:1px solid #2b333d;border-radius:6px;padding:2px 6px;font-size:13px}
+.codebox{background:#0d1117;border:1px solid #2b333d;border-radius:9px;padding:10px;margin-top:10px;max-height:260px;overflow:auto;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.7;white-space:pre-wrap}
+.msg{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1f6feb;color:#fff;padding:10px 16px;border-radius:22px;font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+.msg.on{opacity:1}
+.msg.err{background:#a0342c}
+.hide{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.66);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.dialog{width:min(480px,100%);background:#161b22;border:1px solid #2b333d;border-radius:14px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.dialog-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:4px}
+.dialog-head .ghost{margin-left:auto}
+.dialog-title{font-size:16px;font-weight:600;line-height:1.3}
+.choice{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #2b333d;border-radius:10px;margin-top:8px;cursor:pointer;background:#0d1117}
+.choice:has(input:checked){border-color:#3b82f6;background:#122033}
+.choice input{width:auto;margin:4px 0 0;accent-color:#2f81f7}
+.choice b{display:block;font-size:14px;font-weight:600}
+.choice small{display:block;color:#8b949e;font-size:12px;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>云点传话筒 · 管理后台</h1>
+  <div class="sub">激活码发放 / 用户套餐 / 名额管理</div>
+
+  <div class="card" id="loginCard">
+    <label>管理员账号</label>
+    <input id="au" autocomplete="username" placeholder="admin">
+    <label>密码</label>
+    <input id="ap" type="password" autocomplete="current-password" placeholder="密码">
+    <div style="height:14px"></div>
+    <button id="loginBtn" style="width:100%">登录后台</button>
+  </div>
+
+  <div id="panel" class="hide">
+    <div class="tabs">
+      <button data-tab="users" class="on">用户</button>
+      <button data-tab="codes">激活码</button>
+      <button class="ghost" id="logout" style="margin-left:auto">退出</button>
+    </div>
+
+    <!-- 用户 -->
+    <div id="tab-users">
+      <div class="card">
+        <div class="row">
+          <div style="flex:1"><input id="q" placeholder="搜索账号 / ID"></div>
+          <button class="ghost" id="reloadUsers">刷新</button>
+        </div>
+      </div>
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>ID</th><th>账号</th><th>套餐</th><th>名额</th><th>班级</th><th>到期</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody id="userRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 激活码 -->
+    <div id="tab-codes" class="hide">
+      <div class="card">
+        <div class="grid">
+          <div><label>套餐</label>
+            <select id="plan" onchange="syncPlanDays()"><option value="basic">1 年卡（365 天）</option><option value="trial">3 天体验码</option></select>
+          </div>
+          <div><label>有效期（天）</label><input id="days" type="number" value="365" min="1" max="3650" readonly></div>
+          <div><label>数量</label><input id="count" type="number" value="10" min="1" max="200"></div>
+          <div><label>名额</label><input type="text" value="每张卡 1 个班级" readonly></div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="row">
+          <button id="genBtn">生成激活码</button>
+          <button class="ghost" id="copyBtn">复制全部</button>
+          <button class="ghost" id="dlBtn">下载 txt</button>
+        </div>
+        <div class="hint">卡密只有两种：3 天体验码、1 年卡（365 天）；每张卡固定 1 个班级。买家注册时必须填卡密，否则无法注册。旧永久码（0 天）已停用。</div>
+        <div class="codebox hide" id="genOut"></div>
+      </div>
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>码</th><th>套餐</th><th>+名额</th><th>有效期</th><th>状态</th><th>使用者</th><th>批次</th></tr></thead>
+          <tbody id="codeRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="msg" id="msg"></div>
+
+<div class="modal hide" id="pwModal">
+  <div class="dialog">
+    <div class="dialog-head">
+      <div>
+        <div class="dialog-title">重置用户密码</div>
+        <div class="hint" id="pwWho"></div>
+      </div>
+      <button class="ghost" id="pwClose">关闭</button>
+    </div>
+    <label>手动设置新密码</label>
+    <input id="pwInput" type="password" autocomplete="new-password" placeholder="至少 6 位">
+    <div class="row" style="margin-top:10px">
+      <button id="pwManual">保存新密码</button>
+      <button class="ghost" id="pwRandom">随机生成临时密码</button>
+    </div>
+    <div class="hint">重置后，该用户已登录的会话会失效；如果重置当前管理员自己，则保留本次登录。</div>
+    <div class="codebox hide" id="pwResult"></div>
+    <div class="row hide" id="pwResultActions" style="margin-top:10px">
+      <button class="ghost" id="pwCopy">复制临时密码</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal hide" id="renewModal">
+  <div class="dialog">
+    <div class="dialog-head">
+      <div>
+        <div class="dialog-title">用户续期</div>
+        <div class="hint" id="renewWho"></div>
+      </div>
+      <button class="ghost" id="renewClose">关闭</button>
+    </div>
+    <label>选择续期时长</label>
+    <label class="choice">
+      <input type="radio" name="renewDays" value="365" checked>
+      <span><b>365 天一年</b><small>标准年卡续期，未到期时在现有到期时间上顺延</small></span>
+    </label>
+    <label class="choice">
+      <input type="radio" name="renewDays" value="3">
+      <span><b>3 天体验</b><small>短期体验续期，同样从现有到期时间或当前时间起算</small></span>
+    </label>
+    <div class="row" style="margin-top:14px">
+      <button id="renewConfirm">确认续期</button>
+      <button class="ghost" id="renewCancel">取消</button>
+    </div>
+    <div class="hint">续期时长只能选择固定档位，不能手动输入天数。</div>
+  </div>
+</div>
+
+<script>
+var API='';
+var TOK=localStorage.getItem('ydc_admin_tok')||'';
+var lastGen=[];
+var pwUser=null,lastTempPw='';
+var renewUser=null;
+
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(t,bad){var m=$('#msg');m.textContent=t;m.className='msg on'+(bad?' err':'');setTimeout(function(){m.className='msg'+(bad?' err':'')},2200)}
+function api(path,opt){
+  opt=opt||{};
+  var h={'Content-Type':'application/json'};
+  if(TOK)h['Authorization']='Bearer '+TOK;
+  return fetch(API+path,{method:opt.method||(opt.body?'POST':'GET'),headers:h,body:opt.body?JSON.stringify(opt.body):null})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+}
+function fmtDate(ts){ if(!ts) return '—'; var d=new Date(ts*1000); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') }
+
+function doLogin(){
+  var u=$('#au').value.trim(),p=$('#ap').value;
+  if(!u||!p){toast('请输入账号和密码',1);return}
+  $('#loginBtn').disabled=true;
+  api('/api/admin/login',{body:{username:u,password:p}}).then(function(r){
+    $('#loginBtn').disabled=false;
+    if(!r.j.ok){toast(r.j.error||'登录失败',1);return}
+    TOK=r.j.token; localStorage.setItem('ydc_admin_tok',TOK);
+    showPanel(); loadUsers();
+  }).catch(function(e){$('#loginBtn').disabled=false;toast('网络错误',1)});
+}
+function showPanel(){ $('#loginCard').classList.add('hide'); $('#panel').classList.remove('hide') }
+function doLogout(){ TOK=''; localStorage.removeItem('ydc_admin_tok'); location.reload() }
+
+function openPwModal(id,name){
+  pwUser={id:id,username:name||('ID '+id)};
+  lastTempPw='';
+  $('#pwWho').textContent='账号：'+pwUser.username+'（ID '+id+'）';
+  $('#pwInput').value='';
+  $('#pwResult').className='codebox hide';
+  $('#pwResult').textContent='';
+  $('#pwResultActions').classList.add('hide');
+  $('#pwManual').disabled=false;
+  $('#pwRandom').disabled=false;
+  $('#pwModal').classList.remove('hide');
+  setTimeout(function(){$('#pwInput').focus()},50);
+}
+function closePwModal(){
+  $('#pwModal').classList.add('hide');
+  $('#pwInput').value='';
+  $('#pwResult').className='codebox hide';
+  $('#pwResult').textContent='';
+  $('#pwResultActions').classList.add('hide');
+  $('#pwManual').disabled=false;
+  $('#pwRandom').disabled=false;
+  lastTempPw='';
+}
+function doResetPassword(mode){
+  if(!pwUser)return;
+  var body={id:pwUser.id,action:'reset_password',mode:mode};
+  if(mode==='manual'){
+    var p=$('#pwInput').value;
+    if(p.length<6){toast('密码至少 6 位',1);return}
+    if(p.length>128){toast('密码最长 128 位',1);return}
+    body.password=p;
+  }
+  if(!confirm('确认重置 '+pwUser.username+' 的密码？该用户现有登录将失效。'))return;
+  $('#pwManual').disabled=true; $('#pwRandom').disabled=true;
+  api('/api/admin/user',{body:body}).then(function(r){
+    $('#pwManual').disabled=false; $('#pwRandom').disabled=false;
+    if(!r.j.ok){toast(r.j.error||'重置失败',1);return}
+    if(mode==='random'){
+      lastTempPw=r.j.password||'';
+      $('#pwResult').textContent='临时密码：'+lastTempPw+'\n请立即复制并交给用户，关闭窗口后不再显示。';
+      $('#pwResult').classList.remove('hide');
+      $('#pwResultActions').classList.remove('hide');
+      toast('已生成临时密码');
+    } else {
+      toast('密码已重置');
+      closePwModal();
+    }
+    loadUsers();
+  }).catch(function(){$('#pwManual').disabled=false; $('#pwRandom').disabled=false; toast('网络错误',1)});
+}
+function copyTempPw(){
+  if(!lastTempPw){toast('没有可复制的密码',1);return}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(lastTempPw).then(function(){toast('已复制临时密码')});
+  }else{
+    var ta=document.createElement('textarea');ta.value=lastTempPw;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('已复制临时密码');
+  }
+}
+
+function openRenewModal(id,name){
+  renewUser={id:id,username:name||('ID '+id)};
+  $('#renewWho').textContent='账号：'+renewUser.username+'（ID '+id+'）';
+  var d=document.querySelector('input[name="renewDays"][value="365"]');
+  if(d)d.checked=true;
+  $('#renewConfirm').disabled=false;
+  $('#renewModal').classList.remove('hide');
+}
+function closeRenewModal(){
+  $('#renewModal').classList.add('hide');
+  $('#renewConfirm').disabled=false;
+  renewUser=null;
+}
+function doRenew(){
+  if(!renewUser)return;
+  var sel=document.querySelector('input[name="renewDays"]:checked');
+  var days=sel?Number(sel.value):0;
+  if(days!==3&&days!==365){toast('续期时长只能选择 3 天或 365 天',1);return}
+  if(!confirm('确认给 '+renewUser.username+' 续期 '+days+' 天？'))return;
+  $('#renewConfirm').disabled=true;
+  api('/api/admin/user',{body:{id:renewUser.id,action:'extend',days:days}}).then(function(r){
+    $('#renewConfirm').disabled=false;
+    if(!r.j.ok){toast(r.j.error||'续期失败',1);return}
+    toast('已续期 '+days+' 天');
+    closeRenewModal();
+    loadUsers();
+  }).catch(function(){$('#renewConfirm').disabled=false;toast('网络错误',1)});
+}
+
+function loadUsers(){
+  api('/api/admin/users').then(function(r){
+    if(r.s===401||r.s===403){toast('登录已过期',1);setTimeout(function(){localStorage.removeItem('ydc_admin_tok');location.reload()},900);return}
+    var us=(r.j.users||[]),cs=(r.j.codes||[]);
+    var q=$('#q').value.trim().toLowerCase();
+    var rows='';
+    us.forEach(function(u){
+      if(q && String(u.username).toLowerCase().indexOf(q)<0 && String(u.id)!==q) return;
+      rows+='<tr><td>'+u.id+'</td><td>'+esc(u.username)+'</td>'
+        +'<td><span class="tag '+esc(u.plan)+'">'+esc(u.plan)+'</span></td>'
+        +'<td>'+u.classCount+'/'+u.class_quota+'</td>'
+        +'<td>'+u.classCount+'</td>'
+        +'<td>'+fmtDate(u.expire_at)+'</td>'
+        +'<td>'+(!u.expire_at?'<span class="tag off">无期限·作废</span>':(u.expire_at<=Math.floor(Date.now()/1000)?'<span class="tag off">已过期</span>':(u.status==='active'?'<span class="tag basic">正常</span>':'<span class="tag off">'+esc(u.status)+'</span>')))+'</td>'
+        +'<td><button class="ghost" data-act="extend" data-id="'+u.id+'" data-user="'+esc(u.username)+'">续期</button> '
+        +'<button class="ghost" data-act="reset_password" data-id="'+u.id+'" data-user="'+esc(u.username)+'">重置密码</button> '
+        +'<button class="ghost" data-act="'+(u.status==='active'?'disable':'enable')+'" data-id="'+u.id+'">'+(u.status==='active'?'禁用':'启用')+'</button> '
+        +'<button class="danger" data-act="delete" data-id="'+u.id+'">删除</button></td></tr>'
+    });
+    $('#userRows').innerHTML=rows||'<tr><td colspan="8" style="color:#8b949e">没有数据</td></tr>';
+    var crows='';
+    cs.forEach(function(c){
+      crows+='<tr><td><code>'+esc(c.code)+'</code></td><td>'+esc(c.plan)+'</td><td>'+(c.class_bonus||0)+'</td>'
+        +'<td>'+(c.days>0?c.days+'天':'旧码·已停用')+'</td>'
+        +'<td>'+(c.used_by?'<span class="tag off">已用</span>':'<span class="tag basic">未用</span>')+'</td>'
+        +'<td>'+esc(c.used_by||'')+'</td><td>'+esc(c.batch||'')+'</td></tr>'
+    });
+    $('#codeRows').innerHTML=crows||'<tr><td colspan="7" style="color:#8b949e">还没有生成激活码</td></tr>';
+  })
+}
+
+function syncPlanDays(){$('#days').value=($('#plan').value==='trial'?3:365);}
+function genCodes(){
+  var plan=$('#plan').value, days=(plan==='trial'?3:365), count=Number($('#count').value)||1, bonus=0;
+  $('#genBtn').disabled=true;
+  api('/api/admin/codes',{body:{plan:plan,days:days,count:count,class_bonus:bonus}}).then(function(r){
+    $('#genBtn').disabled=false;
+    if(!r.j.ok){toast(r.j.error||'生成失败',1);return}
+    lastGen=(r.j.codes||[]).slice();
+    var out=$('#genOut'); out.classList.remove('hide'); out.textContent=lastGen.join(String.fromCharCode(10));
+    toast('已生成 '+lastGen.length+' 张');
+    loadUsers();
+  }).catch(function(){$('#genBtn').disabled=false;toast('网络错误',1)})
+}
+function copyAll(){
+  if(!lastGen.length){toast('还没有生成',1);return}
+  var t=lastGen.join(String.fromCharCode(10));
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('已复制 '+lastGen.length+' 张')})}
+  else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('已复制')}
+}
+function dlAll(){
+  if(!lastGen.length){toast('还没有生成',1);return}
+  var b=new Blob([lastGen.join(String.fromCharCode(10))],{type:'text/plain'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download='云点传话筒-激活码-'+Date.now()+'.txt'; a.click();
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.id==='pwModal'){closePwModal();return}
+  if(e.target.id==='renewModal'){closeRenewModal();return}
+  var b=e.target.closest('button[data-act]');
+  if(b){
+    var act=b.getAttribute('data-act'), id=b.getAttribute('data-id');
+    if(act==='reset_password'){openPwModal(Number(id),b.getAttribute('data-user'));return}
+    if(act==='extend'){openRenewModal(Number(id),b.getAttribute('data-user'));return}
+    var body={id:Number(id),action:act};
+    if(act==='plan'){var cur=b.getAttribute('data-plan');var nx=cur==='basic'?'pro':'basic';body.plan=nx;body.class_bonus=0}
+    if(act==='delete'&&!confirm('确认删除用户 '+id+' 及其全部数据？'))return;
+    api('/api/admin/user',{body:body}).then(function(r){
+      if(!r.j.ok){toast(r.j.error||'操作失败',1);return}
+      toast('已执行'); loadUsers();
+    });
+    return;
+  }
+  var t=e.target.closest('.tabs button[data-tab]');
+  if(t){
+    var name=t.getAttribute('data-tab');
+    Array.prototype.forEach.call(document.querySelectorAll('.tabs button[data-tab]'),function(x){x.classList.toggle('on',x===t)});
+    $('#tab-users').classList.toggle('hide',name!=='users');
+    $('#tab-codes').classList.toggle('hide',name!=='codes');
+  }
+});
+
+$('#loginBtn').addEventListener('click',doLogin);
+$('#ap').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
+$('#logout').addEventListener('click',doLogout);
+$('#pwClose').addEventListener('click',closePwModal);
+$('#pwManual').addEventListener('click',function(){doResetPassword('manual')});
+$('#pwRandom').addEventListener('click',function(){doResetPassword('random')});
+$('#pwCopy').addEventListener('click',copyTempPw);
+$('#pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')doResetPassword('manual')});
+$('#renewClose').addEventListener('click',closeRenewModal);
+$('#renewCancel').addEventListener('click',closeRenewModal);
+$('#renewConfirm').addEventListener('click',doRenew);
+$('#genBtn').addEventListener('click',genCodes);
+$('#copyBtn').addEventListener('click',copyAll);
+$('#dlBtn').addEventListener('click',dlAll);
+$('#reloadUsers').addEventListener('click',loadUsers);
+$('#q').addEventListener('input',function(){clearTimeout(window._t);window._t=setTimeout(loadUsers,250)});
+
+if(TOK){ showPanel(); loadUsers(); }
+</script>
+</body>
+</html>

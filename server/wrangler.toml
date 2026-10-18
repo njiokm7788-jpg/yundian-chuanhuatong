@@ -1,0 +1,54 @@
+# ─────────────────────────────────────────────────────────────
+# 本文件为公开仓库模板：所有生产标识 / 密钥已替换为占位符。
+# 部署前请替换：account_id、routes、database_id、KV id、PUBLIC_BASE、CRON_KEY。
+# 建议 CRON_KEY 用 `npx wrangler secret put CRON_KEY` 写入，不要写回本文件。
+# ─────────────────────────────────────────────────────────────
+name = "yundian-chuanhuatong"
+main = "src/index.js"
+compatibility_date = "2026-05-01"
+account_id = "REPLACE_WITH_YOUR_CLOUDFLARE_ACCOUNT_ID"
+workers_dev = false
+
+routes = [
+  { pattern = "your-domain.example.com", custom_domain = true }
+]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "yundian-chuanhuatong"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+[ai]
+binding = "AI"
+
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "RoomDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RoomDO"]
+
+[vars]
+ENV_NAME = "prod"
+PUBLIC_BASE = "https://your-domain.example.com"
+TTS_ENABLED = "1"
+# 教室端最新版本：仅在教室端界面提示「发现新版本」，不强制升级
+DEVICE_LATEST = "2.2.7"
+# 定时任务唤醒密钥（/internal/tick?key=...）；生产环境请改用 wrangler secret 注入
+CRON_KEY = "REPLACE_WITH_A_LONG_RANDOM_SECRET"
+
+# 免费版账号 cron 名额已满（account limit 5），改用 DO alarm 驱动定时任务
+# [triggers]
+# crons = ["* * * * *"]
+
+[observability]
+enabled = true

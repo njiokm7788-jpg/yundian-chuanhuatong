@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFF6E5">
+<title>云点传话筒 · 教师端</title>
+<style>
+@font-face{
+  font-family:'ZCOOL KuaiLe';font-style:normal;font-weight:400;font-display:swap;
+  src:url('/fonts/ZCOOLKuaiLe-sub.woff2') format('woff2');
+}
+:root{
+  --bg:#FFF6E5; --bg-deep:#F6EAD0; --card:#FFFFFF;
+  --mint:#BFE3D1; --mint-soft:#CDEBD9; --green:#2FA36B;
+  --pink:#F6727F; --pink-deep:#E75D6C; --err:#D9535F; --warn:#C98A22;
+  --ink:#22306B; --body:#4A5578; --muted:#A3A9BE;
+  --line:#F0E6CF; --input:#F7F3EA;
+  --radius:24px; --shadow:0 10px 28px rgba(178,152,105,.14);
+  --font-brand:"ZCOOL KuaiLe","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --font-body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:var(--font-body);background:var(--bg-deep);color:var(--body);display:flex;justify-content:center}
+.app{width:100%;max-width:520px;min-height:100vh;min-height:100svh;background:var(--bg);position:relative;display:flex;flex-direction:column}
+main{flex:1;padding-bottom:112px}
+main.nobar{padding-bottom:26px}
+.view.anim{animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- 通用 ---------- */
+.wrap{padding:20px 20px 0}
+.brand{font-family:var(--font-brand);color:var(--ink);font-weight:400}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-top:16px}
+.cols>.c-d{margin-top:16px}
+.logout-block{margin-top:22px}
+.card h3{font-family:var(--font-brand);color:var(--ink);font-size:20px;font-weight:400;margin-bottom:12px}
+.card h3 .sub{font-family:var(--font-body);font-size:12px;color:var(--muted);margin-left:8px}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;border:none;cursor:pointer;text-decoration:none;
+  background:var(--pink);color:#fff;
+  font-family:var(--font-brand);font-size:20px;letter-spacing:2px;
+  padding:16px;border-radius:999px;
+  box-shadow:0 8px 20px rgba(246,114,127,.38);
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.btn:active{transform:scale(.97);box-shadow:0 4px 12px rgba(246,114,127,.3)}
+.btn.ghost{background:var(--input);color:var(--ink);box-shadow:none;font-size:17px;letter-spacing:1px}
+.btn.danger{background:#FDE3E6;color:var(--err);box-shadow:none;font-size:17px;letter-spacing:1px}
+.btn.disabled,.btn:disabled{background:#E4DFD2;color:#9A9689;box-shadow:none;cursor:not-allowed}
+.btn.sm{width:auto;font-size:14px;letter-spacing:0;padding:9px 16px;border-radius:999px;box-shadow:none;background:var(--input);color:var(--ink);font-family:var(--font-body);font-weight:700}
+.btn.sm.pink{background:var(--pink);color:#fff}
+.field{
+  display:flex;align-items:center;gap:12px;
+  background:var(--input);border:2px solid transparent;border-radius:20px;
+  padding:15px;margin-top:14px;transition:border-color .15s;
+}
+.field:focus-within{border-color:var(--pink)}
+.field .icon{font-size:19px;flex:none}
+.field input{border:none;background:none;outline:none;flex:1;font-size:16px;color:var(--ink);font-family:var(--font-body);min-width:0}
+.field input::placeholder{color:var(--muted)}
+label.f{display:block;font-family:var(--font-brand);font-size:15px;color:var(--ink);margin:16px 0 0}
+.time-row{display:flex;gap:10px;margin-top:8px}
+.time-row select{flex:1;min-width:0}
+input[type=text],input[type=number],input[type=time],input[type=password],select{
+  width:100%;border:2px solid transparent;background:var(--input);border-radius:16px;
+  padding:14px;font-size:16px;color:var(--ink);font-family:var(--font-body);outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--pink)}
+select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+textarea{width:100%;min-height:112px;resize:vertical;border:2px solid transparent;background:var(--input);border-radius:18px;outline:none;padding:15px;font-size:16px;line-height:1.65;color:var(--ink);font-family:var(--font-body)}
+textarea::placeholder{color:var(--muted)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 2px}
+.row+.row{border-top:1px solid var(--line)}
+.row .label{font-size:16px;color:var(--ink);font-weight:600}
+.row .hint{margin-top:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sep{height:1px;background:var(--line);margin:16px 0}
+.hint{font-size:13px;color:var(--muted);line-height:1.75}
+.hint.err{color:var(--err)}
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:22px 0}
+.center{text-align:center}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--mint-soft);color:#1F7A4D;
+  font-size:13.5px;font-weight:700;padding:8px 15px;border-radius:999px;white-space:nowrap;
+}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.pill.off{background:#ECE7D8;color:#8B8FA3}
+.pill.off .dot{background:#B9BDCB}
+.pill.wait{background:#FFF3D6;color:var(--warn)}
+.pill.wait .dot{background:#E8AC3C}
+.pill.bad{background:#FDE3E6;color:var(--err)}
+.pill.bad .dot{background:var(--err)}
+.tip{background:#FFF3D6;border-radius:16px;padding:14px 16px;font-size:13.5px;line-height:1.8;color:#8A6D2B;margin-top:14px}
+.tip.warn{background:#FDE3E6;color:#A8404C}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch}
+.chip{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:999px;background:var(--card);
+  border:1.5px solid var(--line);font-size:13.5px;color:var(--body);white-space:nowrap;cursor:pointer;
+}
+.chip.on{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700}
+.chip.on .dot{background:#fff}
+.chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#C3C9D4}
+.chip .dot.on{background:var(--green)}
+.qi{display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;cursor:pointer;
+  background:var(--input);border:1.5px solid transparent;border-radius:16px;padding:11px 13px;font-size:13.5px;color:var(--body)}
+.qi:active{border-color:var(--pink)}
+.qi b{font-family:var(--font-brand);font-size:14px;color:var(--pink-deep);font-weight:400}
+.qi span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- 步进器 / 开关 ---------- */
+.stepper{display:flex;align-items:center;gap:10px;flex:none}
+.stepper button{width:38px;height:38px;border-radius:14px;border:none;cursor:pointer;background:var(--input);color:var(--ink);font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.stepper button:active{background:#EFE7D2}
+.stepper .val{font-size:17px;font-weight:800;color:var(--ink);min-width:46px;text-align:center}
+.switch{position:relative;width:56px;height:32px;flex:none;cursor:pointer}
+.switch .track{position:absolute;inset:0;border-radius:999px;background:#DCD6C4;transition:background .2s}
+.switch .knob{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18);transition:left .2s}
+.switch.on .track{background:var(--pink)}
+.switch.on .knob{left:28px}
+
+/* ---------- 顶部薄荷头 ---------- */
+.topbar{background:var(--mint);border-radius:0 0 28px 28px;padding:18px 20px;display:flex;align-items:center;gap:12px}
+.topbar .logo{width:50px;height:50px;flex:none}
+.topbar .tb-main{flex:1;min-width:0}
+.topbar h1{font-family:var(--font-brand);font-weight:400;font-size:22px;color:var(--ink);line-height:1.25}
+.topbar .tb-sub{font-size:12px;color:var(--ink);opacity:.62;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.page-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:26px 20px 0}
+.page-title h2{font-family:var(--font-brand);font-weight:400;font-size:26px;color:var(--ink)}
+
+/* ---------- 登录 / 注册 ---------- */
+.auth-hero{text-align:center;padding:44px 20px 8px}
+.auth-hero .mascot{width:118px;height:98px;margin:0 auto;display:block}
+.auth-hero h1{font-family:var(--font-brand);font-size:37px;color:var(--ink);margin-top:10px;font-weight:400}
+.auth-hero p{color:var(--muted);font-size:14px;margin-top:8px;letter-spacing:6px}
+.auth-links{display:flex;justify-content:center;gap:28px;margin-top:20px;font-size:15px}
+.auth-links a{color:var(--pink-deep);text-decoration:none;font-weight:600;cursor:pointer}
+.auth-links a.dim{color:var(--muted)}
+
+/* ---------- 播报状态页 ---------- */
+.status-hero{text-align:center;padding:52px 20px 10px}
+.status-hero .big{font-size:56px;line-height:1}
+.status-hero .big.live{animation:pulse 1.4s infinite}
+.status-hero h2{font-family:var(--font-brand);font-weight:400;font-size:26px;color:var(--ink);margin-top:14px}
+.status-hero h2.err{color:var(--err)}
+.status-hero p{color:var(--muted);font-size:14px;margin-top:10px;padding:0 24px;line-height:1.75;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.steps{margin-top:4px}
+.step{display:flex;align-items:center;gap:14px;padding:13px 4px;color:var(--muted);font-size:15px}
+.step+.step{border-top:1px solid var(--line)}
+.step .n{width:32px;height:32px;border-radius:50%;flex:none;background:var(--input);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.step.doing{color:var(--ink);font-weight:700}
+.step.doing .n{background:#FFE3A8;animation:pulse 1s infinite}
+.step.done{color:var(--ink)}
+.step.done .n{background:var(--mint-soft);color:var(--green)}
+.step.fail{color:var(--err);font-weight:700}
+.step.fail .n{background:#FDE3E6;color:var(--err)}
+
+/* ---------- 记录 ---------- */
+.log .it{display:flex;gap:12px;padding:14px 2px;align-items:flex-start}
+.log .it+.it{border-top:1px solid var(--line)}
+.log .t{flex:1;min-width:0}
+.log .t .x{font-size:15px;color:var(--ink);word-break:break-all;line-height:1.55}
+.log .t .m{font-size:12px;color:var(--muted);margin-top:5px}
+
+/* ---------- 我的 ---------- */
+.me-head{display:flex;align-items:center;gap:14px}
+.me-head .avatar{width:64px;height:64px;border-radius:24px;background:var(--mint);display:flex;align-items:center;justify-content:center;font-size:32px;flex:none}
+.me-head b{font-size:19px;color:var(--ink);display:block;word-break:break-all}
+.me-head span{font-size:13px;color:var(--muted)}
+.menu-item{display:flex;align-items:center;gap:12px;padding:15px 2px;cursor:pointer;font-size:16px;color:var(--ink)}
+.menu-item+.menu-item{border-top:1px solid var(--line)}
+.menu-item .icon{font-size:20px}
+.menu-item .arrow{margin-left:auto;color:var(--muted)}
+.menu-item .pill{margin-left:auto}
+.class-item{display:flex;align-items:center;gap:12px;padding:14px 2px}
+.class-item+.class-item{border-top:1px solid var(--line)}
+.class-item .avatar{width:46px;height:46px;border-radius:16px;background:var(--mint-soft);display:flex;align-items:center;justify-content:center;font-size:23px;flex:none}
+.class-item .info{flex:1;min-width:0}
+.class-item .info b{color:var(--ink);font-size:16px}
+.class-item .info span{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ---------- 底部导航 ---------- */
+.tabbar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:520px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  display:flex;padding:8px 8px calc(10px + env(safe-area-inset-bottom));z-index:50;
+}
+.tabbar button{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);padding:6px;font-family:var(--font-body)}
+.tabbar button .t-icon{font-size:23px;filter:grayscale(1);opacity:.55}
+.tabbar button.active{color:var(--pink-deep);font-weight:700}
+.tabbar button.active .t-icon{filter:none;opacity:1}
+
+/* ---------- 弹窗 / Toast ---------- */
+.mask{position:fixed;inset:0;background:rgba(60,45,25,.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.mask.show{display:flex}
+.sheet{width:100%;max-width:520px;background:#fff;border-radius:28px 28px 0 0;
+  padding:24px 22px calc(24px + env(safe-area-inset-bottom));animation:sheetUp .3s ease;
+  max-height:88vh;overflow:auto}
+@keyframes sheetUp{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{font-family:var(--font-brand);font-weight:400;font-size:23px;color:var(--ink);margin-bottom:12px}
+.sheet .big{font-family:var(--font-brand);color:var(--pink-deep);font-size:26px;text-align:center;padding:12px 0;letter-spacing:2px}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;color:var(--ink);padding:9px 0;border-bottom:1px solid var(--line)}
+.kv span:last-child{color:var(--muted);text-align:right}
+.kv span:last-child b{color:var(--ink)}
+.list-item{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.list-item .g{flex:1;min-width:0}
+.list-item b{color:var(--ink);font-size:15px}
+.toast{
+  position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(20px);
+  background:#3A3F5C;color:#fff;font-size:14px;padding:12px 22px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:all .25s;z-index:200;white-space:nowrap;
+  max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.hide{display:none!important}
+
+/* ================= 桌面端（≥900px）：宽屏 + 双栏 + 顶部胶囊导航 ================= */
+@media (min-width:900px){
+  body{padding:0;background:var(--bg)}
+  .app{max-width:1080px;border-radius:0;box-shadow:none;min-height:100vh;min-height:100svh}
+  main{padding-bottom:48px}
+  .wrap{padding:24px 32px 0}
+  .page-title{padding:30px 32px 0}
+  .topbar{padding:22px 32px;border-radius:0 0 28px 28px}
+  .topbar .logo{width:56px;height:56px}
+  .topbar h1{font-size:25px}
+  .card{padding:22px}
+
+  /* 导航从底栏变成吸顶胶囊 */
+  .tabbar{
+    position:sticky;top:0;left:auto;transform:none;
+    width:100%;max-width:1080px;justify-content:center;gap:10px;
+    padding:13px 32px;border-top:0;border-bottom:1px solid var(--line);
+    background:rgba(255,246,229,.94);border-radius:0;
+  }
+  .tabbar button{flex:0 0 auto;flex-direction:row;gap:8px;font-size:15px;font-weight:700;
+    color:var(--body);padding:10px 22px;border-radius:999px}
+  .tabbar button .t-icon{font-size:19px}
+  .tabbar button.active{background:var(--pink);color:#fff;box-shadow:0 8px 20px rgba(246,114,127,.32)}
+
+  /* 双栏栅格：手机端顺序＝内容→发送→设置→常用语，桌面端重排为左右两列 */
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) 388px;gap:22px;align-items:start;margin-top:18px}
+  .cols>*{min-width:0;margin-top:0}
+  .cols>.c-d{margin-top:0}
+  .cols .card{margin-top:0}
+  .c-a{grid-column:1;grid-row:1}
+  .c-b{grid-column:2;grid-row:1}
+  .c-c{grid-column:1;grid-row:2}
+  .c-d{grid-column:2;grid-row:2}
+  .c-full{grid-column:1/-1}
+
+  /* 记录列表两列排布 */
+  .log{display:grid;grid-template-columns:1fr 1fr;column-gap:34px;align-content:start}
+  .log .it:nth-child(2){border-top:0}
+
+  /* 弹窗由底部抽屉改为居中模态 */
+  .mask{align-items:center;padding:32px}
+  .sheet{border-radius:28px;max-width:520px;max-height:84vh}
+
+  /* 登录页左右分栏 */
+  .auth{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
+    max-width:920px;margin:0 auto;min-height:100vh;min-height:100svh;padding:0 32px}
+  .auth-hero{padding:0}
+  .auth .wrap{padding:0}
+  .auth-hero .mascot{width:150px;height:124px}
+  .auth-hero h1{font-size:44px}
+
+  /* 播报状态页居中收窄 */
+  .status-wrap{max-width:620px;margin:0 auto}
+  .status-hero{padding:64px 20px 10px}
+  .toast{bottom:44px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<main id="app"></main>
+</div>
+<div class="mask" id="mask" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheetInner"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ---------------- 基础 ---------------- */
+const $=(s,r)=>(r||document).querySelector(s);
+const app=$('#app');
+const S={token:localStorage.getItem('ydc_token')||'',user:null,classes:[],cur:null,messages:[],templates:[],schedules:[],
+  tab:'say',view:'loading',sending:false,lastMsg:null};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MASCOT=fill=>`<svg class="mascot logo" viewBox="0 0 120 100" fill="none">
+  <path d="M28 78c-11 0-20-8.6-20-19.2C8 49.5 15.4 42 24.5 40.6 27.6 28 39 19 52.5 19c11 0 20.6 6.2 25.4 15.3C80.4 33 84 32 87.5 32 99.4 32 109 41.4 109 53c0 11.6-9.6 21-21.5 21H28z" fill="${fill}"/>
+  <circle cx="47" cy="55" r="4.5" fill="#22306B"/><circle cx="73" cy="55" r="4.5" fill="#22306B"/>
+  <path d="M54 64c3 3.4 9 3.4 12 0" stroke="#22306B" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="38" cy="62" rx="6" ry="4" fill="#F9B4BC"/><ellipse cx="82" cy="62" rx="6" ry="4" fill="#F9B4BC"/>
+</svg>`;
+/* ---------------- 防闪烁：按需重绘 + 换屏才播入场动画 + 保住滚动与光标 ----------------
+   背景：render() 原本每次整块替换 #app，而 .view 挂着 fadeUp 入场动画，
+   于是 3s/15s 的轮询刷新每轮都重播一次「透明→淡入」= 肉眼可见的白闪，
+   同时重建 DOM 会丢掉滚动位置与输入光标。这里用三道闸拦住它。 */
+let lastView=null,lastTab=null,lastFp=null;
+/* 闸一：参与渲染的全部数据算指纹，指纹没变就一个 DOM 都不碰 */
+function stateFp(){
+  const u=S.user||{};
+  return JSON.stringify([S.tab,S.view,S.sending,S.cur&&S.cur.id,S.lastErr,S.voice,S.repeat,
+    u.username,u.plan,u.expireAt,u.quota,u.expired,
+    /* classes 只取被渲染到的字段，lastSeen 量化到分钟（心跳每 5 分钟镜像一次，毫秒变化无人看得见） */
+    (S.classes||[]).map(c=>[c.id,c.name,c.pairCode,c.deviceName,c.online,Math.floor((c.lastSeen||0)/60000),c.config||null]),
+    S.messages,S.templates,S.defaults,S.schedules,
+    S.lastMsg&&[S.lastMsg.id,S.lastMsg.text,S.lastMsg.error,S.lastMsg.tsStart],
+    /* 5 分钟时间桶：让「N 天后到期 / 最后在线」这类时间文案保持新鲜，代价是每 5 分钟一次无动画的静默重绘 */
+    Math.floor(Date.now()/300000)]);
+}
+function markFp(){lastFp=stateFp();}
+/* 闸二：只有 view/tab 真的切换才算「换屏」，只有换屏才播 fadeUp（返回 true）
+   loading 只是启动期的内部过渡态，不播动画，避免首屏连闪两下 */
+function viewCls(){
+  const changed=(lastView!==S.view)||(lastTab!==S.tab);
+  lastView=S.view;lastTab=S.tab;
+  return changed&&S.view!=='loading';
+}
+/* 闸三：重绘前记下滚动位置与输入焦点/选区，重绘后还原（换屏不还原，保持调用方的置顶） */
+function saveLive(){
+  const a=document.activeElement;
+  const isField=!!(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'));
+  let sel=null,selEnd=null;
+  if(isField){try{sel=a.selectionStart!=null?a.selectionStart:null;selEnd=a.selectionEnd!=null?a.selectionEnd:null;}catch(e){}}
+  return{y:window.scrollY||0,id:isField&&a.id?a.id:'',sel:sel,selEnd:selEnd};
+}
+function restoreLive(snap,anim){
+  if(!snap||anim)return;
+  if(snap.id){const el=document.getElementById(snap.id);
+    if(el){try{el.focus({preventScroll:true});
+      if(snap.sel!=null&&el.setSelectionRange)el.setSelectionRange(snap.sel,snap.selEnd);}catch(e){}}}
+  if(snap.y>0)requestAnimationFrame(()=>window.scrollTo(0,snap.y));
+}
+let toastT=null;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);}
+async function api(path,body,method){
+  const opt={method:method||(body?'POST':'GET'),headers:{}};
+  if(S.token)opt.headers['authorization']='Bearer '+S.token;
+  if(body!==undefined){opt.headers['content-type']='application/json';opt.body=JSON.stringify(body||{});}
+  const r=await fetch(path,opt);
+  let d={};try{d=await r.json();}catch(e){}
+  if(!d.ok){if(r.status===401)logout(false);throw new Error(d.error||('请求失败('+r.status+')'));}
+  return d;
+}
+function fmtTime(ts){if(!ts)return '';const d=new Date(ts*1000);const p=n=>String(n).padStart(2,'0');return p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
+function fmtLeft(ts){if(!ts)return '未设置';const s=ts-Math.floor(Date.now()/1000);if(s<0)return '已过期';const d=Math.floor(s/86400);return d>0?d+'天后到期':Math.floor(s/3600)+'小时后到期';}
+function sheet(html){$('#sheetInner').innerHTML=html;$('#mask').classList.add('show');}
+function closeSheet(){$('#mask').classList.remove('show');}
+function goTab(t){S.tab=t;render();window.scrollTo(0,0);}
+function planName(p){return p==='pro'?'专业版':p==='basic'?'标准版':'体验版';}
+function switchHtml(on,key){
+  return `<div class="switch ${on?'on':''}" onclick="S.${key}=${on?0:1};render()"><div class="track"><div class="knob"></div></div></div>`;
+}
+
+/* ---------------- 登录 ---------------- */
+let loginMode='login';
+function renderLogin(){
+  const reg=loginMode==='reg';
+  const snap=saveLive(),anim=viewCls();
+  app.className='nobar';
+  app.innerHTML=`<div class="view${anim?' anim':''}"><div class="auth">
+    <div class="auth-hero">
+      ${MASCOT('#CDE9F7')}
+      <h1 class="brand">云点传话筒</h1>
+      <p>教 师 端</p>
+    </div>
+    <div class="wrap">
+      <div class="field"><span class="icon">📱</span><input id="u" placeholder="手机号或自定义账号" autocomplete="username"></div>
+      <div class="field"><span class="icon">🔒</span><input id="p" type="password" placeholder="${reg?'请设置密码（6 位以上）':'请输入密码'}" autocomplete="${reg?'new-password':'current-password'}"></div>
+      ${reg?'<div class="field"><span class="icon">🎫</span><input id="c" placeholder="激活码，如 CTH-B2K9M-7XQ4"></div>':''}
+      <div style="margin-top:22px"><button class="btn" id="authBtn" onclick="doAuth()">${reg?'注册并登录':'登录'}</button></div>
+      <div class="auth-links">
+        <a onclick="loginMode='${reg?'login':'reg'}';renderLogin()">${reg?'已有账号，去登录':'注册账号'}</a>
+        <a class="dim" onclick="toast('请联系客服重置密码')">忘记密码</a>
+      </div>
+      <div class="hint" style="text-align:center;margin-top:24px;padding:0 6px">注册需要激活码。教室端电脑请下载「云点传话筒教室端」，输入绑定码后 24 小时在线接收通知。</div>
+    </div>
+  </div></div>`;
+  $('#u').value=localStorage.getItem('ydc_user')||'';
+  markFp();restoreLive(snap,anim);
+}
+async function doAuth(){
+  const btn=$('#authBtn');
+  const u=$('#u').value.trim(),p=$('#p').value;
+  if(!u||!p)return toast('请填写账号和密码');
+  if(loginMode==='reg'){const cc=($('#c')&&$('#c').value.trim())||'';if(!cc)return toast('注册需要激活码，请先获取激活码');S.regCode=cc;}
+  if(btn){btn.disabled=true;btn.textContent='请稍候…';}
+  try{
+    const path=loginMode==='login'?'/api/login':'/api/register';
+    const b={username:u,password:p};
+    if(loginMode==='reg')b.code=S.regCode||'';
+    const d=await api(path,b);
+    S.token=d.token;localStorage.setItem('ydc_token',S.token);localStorage.setItem('ydc_user',u);
+    await loadAll();S.view='main';S.tab='say';render();window.scrollTo(0,0);
+  }catch(e){toast(e.message);if(btn){btn.disabled=false;btn.textContent=loginMode==='reg'?'注册并登录':'登录';}}
+}
+function logout(show){S.token='';S.user=null;S.lastMsg=null;localStorage.removeItem('ydc_token');S.view='login';renderLogin();if(show)toast('已退出登录');}
+</script>
+<script>
+/* ---------------- 数据 ---------------- */
+async function loadAll(){
+  const me=await api('/api/me');
+  S.user=me.user;S.classes=me.classes||[];S.serverTime=me.serverTime;
+  if(!S.cur||!S.classes.some(c=>c.id===S.cur.id))S.cur=S.classes[0]||null;
+  else S.cur=S.classes.find(c=>c.id===S.cur.id);
+  const [m,t,s]=await Promise.all([
+    api('/api/messages'+(S.cur?('?classId='+S.cur.id):'')).catch(()=>({messages:[]})),
+    api('/api/templates').catch(()=>({templates:[],defaults:[]})),
+    api('/api/schedules').catch(()=>({schedules:[]}))
+  ]);
+  S.messages=m.messages||[];S.templates=t.templates||[];S.defaults=t.defaults||[];S.schedules=s.schedules||[];
+}
+function render(){
+  if(S.view==='status')return renderStatus();
+  if(S.view!=='main')return renderLogin();
+  const u=S.user||{},expired=!!u.expired;
+  const body=S.tab==='say'?renderSay(expired):S.tab==='log'?renderLog():renderMe(expired);
+  const snap=saveLive(),anim=viewCls();
+  app.className='';
+  app.innerHTML=`<nav class="tabbar">
+      <button class="${S.tab==='say'?'active':''}" onclick="goTab('say')"><span class="t-icon">📢</span>喊话</button>
+      <button class="${S.tab==='log'?'active':''}" onclick="goTab('log')"><span class="t-icon">🕘</span>记录</button>
+      <button class="${S.tab==='me'?'active':''}" onclick="goTab('me')"><span class="t-icon">👤</span>我的</button>
+    </nav>
+    <div class="view${anim?' anim':''}">${body}</div>`;
+  if(S.tab==='say'){const m=$('#msg');if(m){m.value=S.draft||'';m.oninput=()=>{S.draft=m.value;const c=$('#charCount');if(c)c.textContent=m.value.length;};}}
+  markFp();restoreLive(snap,anim);
+}
+/* ---------------- 喊话 ---------------- */
+function renderSay(expired){
+  const u=S.user||{};
+  const head=`<div class="topbar">
+    ${MASCOT('#FFFFFF')}
+    <div class="tb-main"><h1>云点传话筒 · 教师端</h1>
+      <div class="tb-sub">${esc(u.username||'')} · ${planName(u.plan)} · 班级 ${S.classes.length}/${u.quota||1}${expired?' · 已过期':' · '+fmtLeft(u.expireAt)}</div>
+    </div></div>`;
+  if(!S.classes.length){
+    return head+`<div class="wrap"><div class="card center" style="padding:30px 20px">
+      <div style="font-size:38px">🏫</div>
+      <h3 style="margin:10px 0 6px">还没有教室</h3>
+      <div class="hint">先创建一个班级，教室端电脑用绑定码登录即可接收通知</div>
+      <div style="margin-top:18px"><button class="btn" onclick="newClass()">创建我的第一个班级</button></div>
+    </div></div>`;
+  }
+  const c=S.cur||S.classes[0];
+  const tpl=[...(S.templates.length?S.templates:[]),...((S.defaults||[]).filter(d=>!S.templates.some(t=>t.text===d.text)))];
+  const tplHtml=tpl.slice(0,8).map(t=>`<div class="qi" onclick="quick(${JSON.stringify(t.text).replace(/"/g,'&quot;')})"><b>${esc(t.title)}</b><span>${esc(t.text)}</span></div>`).join('')||'<div class="empty">暂无常用语</div>';
+  const off=!c.online&&c.deviceName;
+  return head+`<div class="wrap">
+    <div class="center" style="margin-top:16px">
+      <span class="pill ${c.online?'':'off'}" onclick="classPicker()" style="cursor:pointer">
+        <span class="dot"></span>${esc(c.name)} · ${c.online?'在线':(c.deviceName?'离线':'未绑定')}
+      </span>
+    </div>
+    ${expired?`<div class="tip warn">套餐已过期，已停止发送。请到「我的」页输入激活码续期（3 天体验码 / 1 年卡）。</div>`:''}
+    ${off?`<div class="tip warn">教室端离线，暂时无法喊话，请确认教室电脑已开机联网。</div>`:''}
+    <div class="cols">
+    <div class="card c-a">
+      <h3>📢 喊话内容<span class="sub">教室大屏显示 + 语音播报</span></h3>
+      <textarea id="msg" maxlength="160" placeholder="输入要播报的内容…"></textarea>
+      <div class="hint" style="text-align:right;margin-top:8px"><span id="charCount">0</span>/160</div>
+    </div>
+    <div class="c-d">
+      ${S.lastErr?`<div class="tip warn" style="margin-top:0">上次发送失败：${esc(S.lastErr)}</div>`:''}
+      <button class="btn ${expired?'disabled':''}" id="sendBtn" onclick="sendMsg()"${expired?' disabled':''}>${expired?'套餐已到期':'📢 发送播报'}</button>
+      <div class="hint center" style="margin:14px 0 4px">绑定码 ${esc(c.pairCode||'')} · 教室端凭此码绑定</div>
+    </div>
+    <div class="card c-b">
+      <div class="row">
+        <div><span class="label">语音播报</span><div class="hint">教室电脑朗读通知内容</div></div>
+        ${switchHtml(S.voice!==0,'voice')}
+      </div>
+      <div class="row">
+        <div><span class="label">播报次数</span><div class="hint">重复朗读几遍</div></div>
+        <div class="stepper">
+          <button onclick="stepRepeat(-1)">−</button>
+          <span class="val"><span id="repeatVal">${S.repeat||1}</span> 次</span>
+          <button onclick="stepRepeat(1)">＋</button>
+        </div>
+      </div>
+    </div>
+    <div class="card c-c">
+      <div style="display:flex;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0">⚡ 常用语<span class="sub">点一下填入</span></h3>
+        <a class="hint" style="margin-left:auto;color:var(--pink-deep);font-weight:700" onclick="editTemplates()">管理</a>
+      </div>
+      <div class="grid2" style="gap:8px">${tplHtml}</div>
+    </div>
+    </div>
+  </div>`;
+}
+function classPicker(){
+  const list=S.classes.map(c=>`<div class="menu-item" onclick="pickClass(${c.id})">
+    <span class="icon">🏫</span><span>${esc(c.name)}</span>
+    <span class="pill ${c.online?'':'off'}"><span class="dot"></span>${c.online?'在线':(c.deviceName?'离线':'未绑定')}</span></div>`).join('')||'<div class="empty">还没有教室</div>';
+  sheet(`<h3>选择教室</h3>${list}
+    <div class="sep"></div>
+    <div class="grid2"><button class="btn ghost" onclick="closeSheet();newClass()">＋ 新建</button>
+    <button class="btn ghost" onclick="closeSheet();goTab('me')">教室管理</button></div>`);
+}
+function stepRepeat(d){S.repeat=Math.min(5,Math.max(1,(S.repeat||1)+d));const v=$('#repeatVal');if(v)v.textContent=S.repeat;}
+function pickClass(id){S.cur=S.classes.find(c=>c.id===id);S.draft='';closeSheet();refresh();}
+function quick(t){S.draft=t;const m=$('#msg');if(m){m.value=t;const c=$('#charCount');if(c)c.textContent=t.length;}toast('已填入，点「发送播报」');}
+async function sendMsg(textArg){
+  const ta=$('#msg');
+  const text=(textArg!=null?String(textArg):(ta?ta.value:S.draft||'')).trim();
+  if(!text)return toast('先输入要播报的内容');
+  if(!S.cur)return toast('请先创建教室');
+  if(S.user&&S.user.expired)return toast('账号已到期，请先激活/续期');
+  if(S.sending)return;
+  const cls=S.cur,voice=S.voice===0?0:1,repeat=S.repeat||1;
+  S.sending=true;S.lastErr='';
+  S.lastMsg={id:0,text:text,classId:cls.id,className:cls.name,voice:voice,repeat:repeat,tsStart:Date.now(),error:''};
+  S.draft='';S.view='status';render();requestAnimationFrame(()=>window.scrollTo(0,0));
+  try{
+    const d=await api('/api/notify',{classId:cls.id,text:text,voice:voice,repeat:repeat});
+    S.lastMsg.id=d.id||0;S.sending=false;
+    await loadAll();render();
+  }catch(e){
+    S.sending=false;
+    S.lastMsg.error=e.message||'发送失败';
+    S.lastErr=S.lastMsg.error;
+    render();
+  }
+}
+function retrySend(){
+  const lm=S.lastMsg;if(!lm)return goTab('say');
+  const c=S.classes.find(x=>x.id===lm.classId);
+  if(c)S.cur=c;
+  sendMsg(lm.text);
+}
+function backToSay(){S.view='main';S.tab='say';S.lastMsg=null;render();window.scrollTo(0,0);}
+function curMsg(){
+  const id=S.lastMsg&&S.lastMsg.id;
+  if(!id)return null;
+  return (S.messages||[]).find(m=>m.id===id)||null;
+}
+/* 四步进度：h = 当前进行中的步骤下标，4 = 全部完成 */
+function stageInfo(){
+  const lm=S.lastMsg||{};
+  const m=curMsg();
+  if(lm.error)return{h:0,failed:true,err:lm.error};
+  if(m&&(m.failed||m.status==='failed'))return{h:(m.acked?2:1),failed:true,
+    err:m.acked?'教室端播报中断，可能已离线':'教室端没有回执，可能已离线'};
+  if(m&&(m.played||m.status==='played'))return{h:4,failed:false};
+  if(m&&(m.acked||m.status==='acked'))return{h:2,failed:false};
+  if(S.sending)return{h:0,failed:false};
+  return{h:1,failed:false};
+}
+function renderStatus(){
+  const lm=S.lastMsg||{},st=stageInfo(),h=st.h,failed=st.failed;
+  const snap=saveLive(),anim=viewCls();
+  const STEPS=['消息已发出','教室已收到','正在播报','播报完成'];
+  const HERO={0:['📡','正在发送…'],1:['📡','已发出，等待教室接收'],2:['🔊','正在播报…'],4:['✅','播报完成 🎉']};
+  const [emoji,title]=failed?['😢','播报失败']:(HERO[h]||HERO[1]);
+  const hint=failed?st.err:(h===0||h===1?'正在把内容推送到教室电脑，稍等几秒…':h===2?'教室电脑正在朗读，播报结束后自动更新':'教室电脑已完成播报');
+  const elapsed=lm.tsStart?`<div class="hint" style="margin-top:6px">已用时 <b id="elapsed">${Math.max(0,Math.floor((Date.now()-lm.tsStart)/1000))}</b> 秒</div>`:'';
+  const steps=STEPS.map((t,i)=>{
+    if(i<h)return `<div class="step done"><span class="n">✓</span>${t}</div>`;
+    if(i===h)return `<div class="step ${failed?'fail':'doing'}"><span class="n">${failed?'✕':i+1}</span>${t}</div>`;
+    return `<div class="step"><span class="n">${i+1}</span>${t}</div>`;
+  }).join('');
+  app.className='nobar';
+  app.innerHTML=`<div class="view${anim?' anim':''}">
+    <div class="status-hero">
+      <div class="big ${(!failed&&h<4)?'live':''}">${emoji}</div>
+      <h2 class="${failed?'err':''}">${title}</h2>
+      <p>“${esc(lm.text||'')}”</p>
+    </div>
+    <div class="wrap status-wrap">
+      <div class="card steps">${steps}</div>
+      <div class="hint center" style="margin-top:14px">${esc(hint)}</div>
+      ${elapsed}
+      <div style="margin-top:20px">
+        ${failed?'<button class="btn" onclick="retrySend()">重试一次</button><div style="height:10px"></div>':''}
+        <button class="btn ${failed||h<4?'ghost':''}" onclick="backToSay()">${h===4?'返回喊话':'返回喊话（后台继续播报）'}</button>
+      </div>
+      <div class="hint center" style="margin:16px 0 6px">教室端离线时，通知会在它重新联网后补播。</div>
+    </div>
+  </div>`;
+  const e=$('#elapsed');
+  if(e&&lm.tsStart)e.textContent=Math.max(0,Math.floor((Date.now()-lm.tsStart)/1000));
+  markFp();restoreLive(snap,anim);
+}
+function msgState(m){
+  if(m.failed||m.status==='failed')return{cls:'bad',txt:'播报失败',icon:'⚠️'};
+  if(m.played||m.status==='played')return{cls:'ok',txt:'已播报',icon:'✅'};
+  if(m.acked||m.status==='acked')return{cls:'wait',txt:'播报中',icon:'🔊'};
+  return{cls:'wait',txt:'已发送',icon:'📡'};
+}
+function openMsg(id){
+  const m=(S.messages||[]).find(x=>x.id===id);if(!m)return;
+  S.lastMsg={id:m.id,text:m.text,classId:m.classId,className:m.className,tsStart:0,error:''};
+  S.view='status';render();window.scrollTo(0,0);
+}
+function renderLog(){
+  const list=S.messages||[];
+  return `<div class="page-title"><h2>记录</h2>
+      <button class="btn sm" onclick="refresh()">刷新</button></div>
+    <div class="wrap"><div class="card">
+    ${list.length?`<div class="log">${list.map(m=>{const st=msgState(m);return `<div class="it" onclick="openMsg(${m.id})">
+      <div class="t"><div class="x">${esc(m.text)}</div>
+      <div class="m">${esc(m.className||'')} · ${fmtTime(m.createdAt)}${m.hasAudio?' · 🔊':''}${m.repeat>1?' · ×'+m.repeat:''}</div></div>
+      <span class="pill ${st.cls}"><span class="dot"></span>${st.txt}</span></div>`;}).join('')}</div>`:'<div class="empty">还没有发送记录</div>'}
+    ${list.length?'<div class="hint center" style="margin-top:14px">点任意一条可以查看播报进度</div>':''}
+    </div></div>`;
+}
+</script>
+<script>
+/* ---------------- 我的 / 设置 ---------------- */
+function renderMe(expired){
+  const u=S.user||{};
+  const cs=S.classes.map(c=>`<div class="class-item">
+    <div class="avatar">🏫</div>
+    <div class="info"><b>${esc(c.name)}</b><span>绑定码 ${esc(c.pairCode)} · ${c.deviceName?esc(c.deviceName)+(c.online?'（在线）':'（离线）'):'未绑定'}${c.lastSeen?' · 最后在线 '+fmtTime(c.lastSeen):''}</span></div>
+    <button class="btn sm" onclick="classMenu(${c.id})">设置</button></div>`).join('');
+  return `<div class="page-title"><h2>我的</h2></div>
+  <div class="wrap"><div class="cols">
+    <div class="card c-a">
+      <div class="me-head">
+        <div class="avatar">👩‍🏫</div>
+        <div><b>${esc(u.username||'')}</b><span>${planName(u.plan)} · ${expired?'已过期':'有效期至 '+fmtLeft(u.expireAt)}</span></div>
+      </div>
+      ${expired?'<div class="tip warn">套餐已过期，已停止发送。输入激活码即可续期。</div>':''}
+      <div class="grid2" style="margin-top:16px">
+        <button class="btn ghost" onclick="redeemSheet()">激活 / 续期</button>
+        <button class="btn ghost" onclick="installSheet()">下载教室端</button>
+      </div>
+    </div>
+    <div class="card c-b">
+      <h3>🏫 我的教室<span class="sub">${S.classes.length}/${u.quota||1} 个名额</span></h3>
+      ${cs||'<div class="empty">暂无教室</div>'}
+      <div style="margin-top:14px"><button class="btn ghost" onclick="newClass()">＋ 新建教室</button></div>
+      <div class="hint" style="margin-top:10px">每张激活码对应 1 个教室名额。</div>
+    </div>
+    <div class="card c-c">
+      <div class="menu-item" onclick="editTemplates()"><span class="icon">⚡</span>常用语管理<span class="arrow">›</span></div>
+      <div class="menu-item" onclick="schedSheet()"><span class="icon">⏰</span>定时喊话<span class="pill">${S.schedules.length} 条</span></div>
+      <div class="menu-item" onclick="toast('云点传话筒 v1.2.1（教师端）')"><span class="icon">ℹ️</span>关于<span class="arrow">›</span></div>
+    </div>
+    <div class="c-d logout-block"><button class="btn ghost" onclick="logout(true)">退出登录</button></div>
+    <div class="hint center c-full" style="margin:18px 0 6px">教师端 v1.2.1 · 教室端需联网才能接收通知</div>
+  </div></div>`;
+}
+function classMenu(id){
+  const c=S.classes.find(x=>x.id===id);if(!c)return;
+  sheet(`<h3>${esc(c.name)}</h3>
+    <div class="hint">绑定码（教室端登录用）</div>
+    <div class="big" style="padding:6px 0 10px">${esc(c.pairCode)}</div>
+    <div class="hint" style="margin-top:10px">在教室电脑打开「云点传话筒教室端」，输入上面绑定码即可绑定。换电脑时点「重置绑定码」，旧电脑会立即掉线。</div>
+    <div class="kv" style="margin-top:8px"><span>教室电脑</span><span>${c.deviceName?('<b>'+esc(c.deviceName)+'</b>'+(c.online?'（在线）':'（离线）')):'未绑定'}</span></div>
+    <label class="f">班级名称</label><input id="cn" value="${esc(c.name)}">
+    <div style="margin-top:16px"><button class="btn" onclick="saveClass(${id})">保存名称</button></div>
+    <div class="grid2" style="margin-top:10px"><button class="btn ghost" onclick="showConfig(${id})">显示设置</button>
+    <button class="btn ghost" onclick="resetCode(${id})">重置绑定码</button></div>
+    <div style="margin-top:10px"><button class="btn ghost" onclick="unbindDevice(${id})">解除绑定教室电脑</button></div>
+    <div style="margin-top:10px"><button class="btn danger" onclick="delClass(${id})">删除该教室</button></div>`);
+}
+async function unbindDevice(id){
+  const c=S.classes.find(x=>x.id===id)||{};
+  if(!c.deviceName)return toast('该教室还没有绑定教室电脑');
+  if(!confirm('解除绑定后，教室电脑会立即停止接收通知并回到绑定界面。\n绑定码不变，随时可用原码重新绑定。确定？'))return;
+  try{
+    const d=await api('/api/classes/unbind',{id:id});
+    await refresh();classMenu(id);
+    toast('已解除绑定：'+((d&&d.deviceName)||'教室电脑'));
+  }catch(e){toast(e.message);}
+}
+async function saveClass(id){try{await api('/api/classes/update',{id:id,name:$('#cn').value});closeSheet();await refresh();toast('已保存');}catch(e){toast(e.message);}}
+async function resetCode(id){if(!confirm('重置后原教室端会掉线，需重新输入新绑定码，确定？'))return;try{const d=await api('/api/classes/paircode',{id:id});await refresh();classMenu(id);toast('新绑定码：'+d.pairCode);}catch(e){toast(e.message);}}
+async function delClass(id){if(!confirm('删除教室将清除该教室通知与教室端绑定，确定？'))return;try{await api('/api/classes/delete',{id:id});closeSheet();S.cur=null;await refresh();toast('已删除');}catch(e){toast(e.message);}}
+function newClass(){
+  sheet(`<h3>新建教室</h3><label class="f">教室名称</label>
+    <input id="nn" placeholder="如：高一(3)班">
+    <div style="margin-top:18px"><button class="btn" onclick="createClass()">创建</button></div>`);
+}
+async function createClass(){
+  const name=$('#nn').value.trim()||'未命名教室';
+  try{const d=await api('/api/classes',{name:name});closeSheet();await refresh();
+    sheet(`<h3 class="center">创建成功 🎉</h3><div class="hint center">教室端绑定码</div><div class="big">${esc(d.pairCode)}</div>
+    <div class="hint center">请在教室电脑打开教室端，输入这个绑定码。</div>
+    <div style="margin-top:18px"><button class="btn" onclick="closeSheet()">知道了</button></div>`);
+  }catch(e){toast(e.message);}
+}
+function showConfig(id){
+  const c=S.classes.find(x=>x.id===id);const g=c.config||{};
+  sheet(`<h3>教室端显示设置</h3>
+    <label class="f">显示时长（秒）</label><input id="cf1" type="number" min="5" max="600" value="${g.displaySeconds||20}">
+    <label class="f">朗读语速（1.0 正常）</label><input id="cf5" type="number" step="0.1" min="0.5" max="2" value="${(g.voiceRate||10)/10}">
+    <label class="f">主题色</label>
+    <div class="chips" id="cf3">${[['blue','蓝'],['red','红'],['green','绿'],['dark','暗']].map(t=>`<div class="chip ${(g.theme||'blue')===t[0]?'on':''}" onclick="pickTheme('${t[0]}',this)">${t[1]}</div>`).join('')}</div>
+    <div class="row"><div><span class="label">显示当前时间</span></div><div class="switch ${g.showClock!==0?'on':''}" id="cf6" onclick="this.classList.toggle('on')"><div class="track"><div class="knob"></div></div></div></div>
+    <div class="row"><div><span class="label">提示音</span></div><div class="switch ${g.beep!==0?'on':''}" id="cf7" onclick="this.classList.toggle('on')"><div class="track"><div class="knob"></div></div></div></div>
+    <div style="margin-top:16px"><button class="btn" onclick="saveConfig(${id})">保存并下发</button></div>`);
+}
+function pickTheme(t,el){[...el.parentNode.children].forEach(x=>x.classList.remove('on'));el.classList.add('on');}
+async function saveConfig(id){
+  const el=$('#cf3 .chip.on');
+  try{await api('/api/classes/config',{id:id,displaySeconds:$('#cf1').value,voiceRate:$('#cf5').value,
+    theme:el?el.getAttribute('onclick').split("'")[1]:'blue',showClock:$('#cf6').classList.contains('on')?1:0,beep:$('#cf7').classList.contains('on')?1:0});
+    closeSheet();await refresh();toast('已下发到教室端');}catch(e){toast(e.message);}
+}
+function editTemplates(){
+  const mine=S.templates.map(t=>`<div class="list-item">
+    <div class="g"><b>${esc(t.title)}</b><div class="hint">${esc(t.text)}</div></div>
+    <button class="btn sm danger" onclick="delTpl(${t.id})">删</button></div>`).join('')||'<div class="empty">还没有自定义常用语</div>';
+  const dft=(S.defaults||[]).map(d=>`<div class="list-item">
+    <div class="g"><b>${esc(d.title)}</b><div class="hint">${esc(d.text)}</div></div>
+    <button class="btn sm" onclick="addTpl(${JSON.stringify(d.title).replace(/"/g,'&quot;')},${JSON.stringify(d.text).replace(/"/g,'&quot;')})">加入</button></div>`).join('');
+  sheet(`<h3>常用语管理</h3>${mine}
+    <label class="f">新增常用语</label>
+    <input id="tt" placeholder="名称，如：收作业" maxlength="12">
+    <div style="height:10px"></div><input id="tx" placeholder="内容，如：请各组收齐作业" maxlength="60">
+    <div style="margin-top:16px"><button class="btn" onclick="addTpl()">添加</button></div>
+    <div class="sep"></div><h3 style="font-size:18px">推荐语</h3>${dft}`);
+}
+async function addTpl(t,x){
+  const title=t||$('#tt').value.trim(),text=x||$('#tx').value.trim();
+  if(!title||!text)return toast('请填写名称和内容');
+  try{await api('/api/templates',{title:title,text:text});await refresh();editTemplates();toast('已添加');}catch(e){toast(e.message);}
+}
+async function delTpl(id){try{await api('/api/templates',{action:'delete',id:id});await refresh();editTemplates();}catch(e){toast(e.message);}}
+function schedSheet(editId){
+  const editing=editId?(S.schedules||[]).find(s=>Number(s.id)===Number(editId)):null;
+  if(editId&&!editing){toast('任务不存在');return}
+  const list=S.schedules.map(s=>`<div class="list-item" style="align-items:flex-start">
+    <div class="g"><b>${esc(s.time_hhmm)}</b> <span class="pill ${s.enabled?'':'off'}">${s.enabled?'启用':'停用'}</span>
+      <div class="hint">${esc(s.text)} · ${s.mode==='once'?'单次':'每周'+esc(s.weekdays||'')} · 下次 ${fmtTime(s.next_at)}</div></div>
+    <button class="btn sm" onclick="schedSheet(${s.id})">编辑</button>
+    <button class="btn sm" onclick="toggleSched(${s.id})">${s.enabled?'停用':'启用'}</button>
+    <button class="btn sm danger" onclick="delSched(${s.id})">删</button></div>`).join('')||'<div class="empty">暂无定时任务</div>';
+  const classOpts=S.classes.map(c=>`<option value="${c.id}"${editing&&Number(editing.class_id)===Number(c.id)?' selected':''}>${esc(c.name)}</option>`).join('');
+  const time=editing?String(editing.time_hhmm||'08:00'):'08:00';
+  const tp=time.split(':');
+  const hh=String(Math.min(23,Math.max(0,parseInt(tp[0],10)||0))).padStart(2,'0');
+  const mm=String(Math.min(59,Math.max(0,parseInt(tp[1],10)||0))).padStart(2,'0');
+  const hourOpts=Array.from({length:24},(_,i)=>{const v=String(i).padStart(2,'0');return `<option value="${v}"${v===hh?' selected':''}>${v} 时</option>`}).join('');
+  const minuteOpts=Array.from({length:60},(_,i)=>{const v=String(i).padStart(2,'0');return `<option value="${v}"${v===mm?' selected':''}>${v} 分</option>`}).join('');
+  const repeats=[['1,2,3,4,5','工作日（周一至周五）'],['0,1,2,3,4,5,6','每天'],['1','每周一'],['5','每周五']];
+  const repeatVal=editing?String(editing.weekdays||'1,2,3,4,5'):'1,2,3,4,5';
+  const repeatOpts=repeats.map(([v,t])=>`<option value="${v}"${v===repeatVal?' selected':''}>${t}</option>`).join('')
+    +(repeats.some(([v])=>v===repeatVal)?'':`<option value="${esc(repeatVal)}" selected>当前设置（${esc(repeatVal)}）</option>`);
+  const mode=editing&&editing.mode==='once'?'once':'weekly';
+  const onceAt=editing?Number(editing.once_at||0):0;
+  sheet(`<h3>${editing?'编辑定时喊话':'定时喊话'}</h3>${list}
+    <div class="sep"></div>
+    <input id="sc0" type="hidden" value="${editing?editing.id:0}">
+    <input id="sc6" type="hidden" value="${mode}">
+    <input id="sc7" type="hidden" value="${onceAt}">
+    <label class="f">教室</label><select id="sc1">${classOpts}</select>
+    <label class="f">时间</label>
+    <div class="time-row"><select id="sc2h" aria-label="小时">${hourOpts}</select><select id="sc2m" aria-label="分钟">${minuteOpts}</select></div>
+    <label class="f">重复</label>
+    <select id="sc4"${mode==='once'?' disabled':''}>${repeatOpts}</select>
+    ${mode==='once'?'<div class="hint" style="margin-top:8px">单次任务会保留原执行日期，只修改当天时间。</div>':''}
+    <label class="f">内容</label><textarea id="sc3" placeholder="如：请值日同学打扫卫生" maxlength="80" style="min-height:120px">${editing?esc(editing.text):''}</textarea>
+    <div style="margin-top:16px"><button class="btn" onclick="saveSched()">${editing?'保存修改':'添加定时任务'}</button></div>
+    <div class="hint" style="margin-top:12px">定时任务由服务器准点下发，教室端离线会在联网后补播。</div>`);
+}
+async function saveSched(){
+  const id=Number($('#sc0').value||0);
+  const body={classId:Number($('#sc1').value||0),time:$('#sc2h').value+':'+$('#sc2m').value,weekdays:$('#sc4').value,text:$('#sc3').value,mode:$('#sc6').value};
+  if(id){body.action='update';body.id=id;body.onceAt=Number($('#sc7').value||0);}
+  try{await api('/api/schedules',body);await refresh();schedSheet();toast(id?'已保存':'已添加');}catch(e){toast(e.message);}
+}
+async function delSched(id){try{await api('/api/schedules',{action:'delete',id:id});await refresh();schedSheet();}catch(e){toast(e.message);}}
+async function toggleSched(id){try{await api('/api/schedules',{action:'toggle',id:id});await refresh();schedSheet();}catch(e){toast(e.message);}}
+function redeemSheet(){
+  sheet(`<h3>激活 / 续期</h3><label class="f">激活码</label><input id="rd" placeholder="如 CTH-B1234-5678">
+    <div style="margin-top:16px"><button class="btn" onclick="doRedeem()">提交激活码</button></div>
+    <div class="hint" style="margin-top:12px">3 天体验码 / 1 年卡均可激活续期，未到期自动顺延；到期后停止发送。</div>`);
+}
+async function doRedeem(){
+  try{const d=await api('/api/redeem',{code:$('#rd').value.trim()});closeSheet();await refresh();
+    const left=(S.user&&S.user.expireAt)?fmtLeft(S.user.expireAt):'';
+    sheet(`<h3 class="center">激活成功 🎉</h3><div class="big">${esc(left)}</div>
+    <div class="hint center">已到账，可以继续喊话了。</div>
+    <div style="margin-top:18px"><button class="btn" onclick="closeSheet()">知道了</button></div>`);
+  }catch(e){toast(e.message);}
+}
+function installSheet(){
+  sheet(`<h3>安装教室端</h3>
+    <div class="hint">1. 在教室电脑打开本页，点下方按钮下载「云点传话筒教室端」。<br>
+    2. 双击运行（首次运行若被拦截，选择「仍要运行」）。<br>
+    3. 输入教室绑定码，程序自动全屏待机，收到通知立即大字显示并朗读。<br>
+    4. 可勾选「开机自启」，之后无需人工干预。</div>
+    <div style="margin-top:18px"><a class="btn" href="/download/yundianchuanhuatong-setup.exe" download>下载教室端</a></div>`);
+}
+/* ---------------- 轮询 / 启动 ---------------- */
+async function refresh(soft){
+  try{await loadAll();if(!soft||stateFp()!==lastFp)render();}catch(e){}
+}
+function typing(){const a=document.activeElement;return !!(a&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT'||a.tagName==='SELECT'));}
+let polling=false;
+function startPolling(){
+  if(polling)return;polling=true;
+  /* 有未播报完的通知时 3 秒一刷（手机端及时看到“已播报”），空闲时 15 秒一刷；播报状态页常刷 */
+  let tick=0;
+  setInterval(()=>{
+    tick++;
+    if(S.view!=='main'&&S.view!=='status')return;
+    if($('#mask').classList.contains('show'))return;
+    if(typing())return;
+    const now=Math.floor(Date.now()/1000);
+    const pending=(S.messages||[]).slice(0,5).some(m=>!m.played&&!m.failed&&(now-(m.createdAt||0))<600);
+    if(S.view==='status'||pending||tick%5===0)refresh(true);
+  },3000);
+  setInterval(()=>{const e=$('#elapsed');if(e&&S.lastMsg&&S.lastMsg.tsStart)e.textContent=Math.max(0,Math.floor((Date.now()-S.lastMsg.tsStart)/1000));},1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!typing()&&(S.view==='main'||S.view==='status'))refresh(true);});
+}
+function init(){
+  startPolling();
+  if(!S.token){S.view='login';renderLogin();return;}
+  refresh().then(()=>{S.view='main';render();});
+}
+init();
+</script>
+</body>
+</html>

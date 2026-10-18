@@ -1,0 +1,29 @@
+# ── 依赖与本地运行产物 ──
+node_modules/
+_localdev/node_modules/
+__pycache__/
+*.pyc
+device-go/.state/
+server/.wrangler/
+.wrangler/
+
+# ── 凭据 / 本地配置（不要提交）──
+.secrets/
+.dev.vars
+.env
+*.pem
+*.key
+
+# ── 构建产物 / 发布二进制 ──
+*.exe
+dist/
+server/public/download/
+device-go/dist/
+*.syso
+
+# ── 日志与临时文件 ──
+*.log
+deploy_log.txt
+*.tmp
+*.bak
+*.bak_*
